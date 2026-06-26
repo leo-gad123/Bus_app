@@ -3,7 +3,7 @@ const Ticket = require('../models/Ticket');
 const Trip = require('../models/Trip');
 const Route = require('../models/Route');
 const Bus = require('../models/Bus');
-const { auth, driverAuth } = require('../middleware/auth');
+const { auth, adminAuth, driverAuth } = require('../middleware/auth');
 const { generateQRSecret, generateQRToken, generateQRCode, decodeQRCode, verifyQRToken } = require('../utils/qr');
 
 const router = express.Router();
@@ -142,6 +142,16 @@ router.delete('/:id', auth, async (req, res) => {
     ticket.status = 'cancelled';
     await ticket.save();
     res.json({ message: 'Ticket cancelled successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.delete('/admin/:id', adminAuth, async (req, res) => {
+  try {
+    const ticket = await Ticket.findByIdAndDelete(req.params.id);
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    res.json({ message: 'Ticket deleted permanently' });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

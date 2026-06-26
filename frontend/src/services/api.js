@@ -60,6 +60,7 @@ export const ticketAPI = {
   endTrip: (id) => API.put(`/tickets/trip/${id}/end`),
   activeTrips: () => API.get('/tickets/trips/active'),
   cancel: (id) => API.delete(`/tickets/${id}`),
+  adminDelete: (id) => API.delete(`/tickets/admin/${id}`),
 };
 
 export default API;

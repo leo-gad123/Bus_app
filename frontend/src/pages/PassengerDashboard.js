@@ -52,7 +52,7 @@ function PassengerDashboard() {
       const { data } = await userAPI.topup(amount);
       setBalance(data.balance);
       setTopupAmount('');
-      setMessage(`Wallet topped up by $${amount}`);
+      setMessage(`Wallet topped up by FRW ${amount}`);
       const stored = JSON.parse(localStorage.getItem('user') || '{}');
       stored.walletBalance = data.balance;
       localStorage.setItem('user', JSON.stringify(stored));
@@ -92,7 +92,7 @@ function PassengerDashboard() {
           <div className="card">
             <div className="card-body">
               <h5>Welcome, {user.name}</h5>
-              <h3 className="text-success">Balance: ${balance.toFixed(2)}</h3>
+              <h3 className="text-success">Balance: FRW {balance.toFixed(2)}</h3>
             </div>
           </div>
         </div>
@@ -123,7 +123,7 @@ function PassengerDashboard() {
                 <option value="">Select Route</option>
                 {routes.map((r) => (
                   <option key={r._id} value={r._id}>
-                    {r.name} ({r.startLocation} → {r.endLocation}) - ${r.baseFare}
+                    {r.name} ({r.startLocation} → {r.endLocation}) - FRW {r.baseFare}
                   </option>
                 ))}
               </select>
@@ -158,41 +158,33 @@ function PassengerDashboard() {
       <div className="card">
         <div className="card-body">
           <h5>Ticket History</h5>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Route</th>
-                <th>Fare</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tickets.map((t) => (
-                <tr key={t._id}>
-                  <td>{t.route?.name || 'N/A'}</td>
-                  <td>${t.fare}</td>
-                  <td>
-                    <span className={`badge bg-${t.status === 'active' ? 'success' : t.status === 'used' ? 'secondary' : 'danger'}`}>
-                      {t.status}
-                    </span>
-                  </td>
-                  <td>{new Date(t.createdAt).toLocaleString()}</td>
-                  <td>
-                    {t.status === 'active' && (
-                      <button className="btn btn-danger btn-sm" onClick={() => handleCancel(t._id)}>
-                        Cancel
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {tickets.length === 0 && (
-                <tr><td colSpan="5" className="text-center">No tickets yet</td></tr>
-              )}
-            </tbody>
-          </table>
+          <div className="data-table" style={{ '--table-cols': '1.5fr 0.7fr 0.7fr 1fr 0.7fr' }}>
+            <div className="data-table-header">
+              <span>Route</span>
+              <span>Fare</span>
+              <span>Status</span>
+              <span>Date</span>
+              <span>Action</span>
+            </div>
+            {tickets.map((t) => (
+              <div className="data-row" key={t._id}>
+                <div className="data-cell">{t.route?.name || 'N/A'}</div>
+                <div className="data-cell" style={{ fontWeight: 600, color: 'var(--green-primary)' }}>${t.fare}</div>
+                <div className="data-cell">
+                  <span className={`badge bg-${t.status === 'active' ? 'success' : t.status === 'used' ? 'secondary' : 'danger'}`}>
+                    {t.status}
+                  </span>
+                </div>
+                <div className="data-cell" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{new Date(t.createdAt).toLocaleString()}</div>
+                <div className="data-cell">
+                  {t.status === 'active' && (
+                    <button className="btn btn-danger btn-sm" onClick={() => handleCancel(t._id)}>Cancel</button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {tickets.length === 0 && <div className="data-empty">No tickets yet</div>}
+          </div>
         </div>
       </div>
     </div>
