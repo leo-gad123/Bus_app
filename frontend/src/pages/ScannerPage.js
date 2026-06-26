@@ -26,7 +26,7 @@ function ScannerPage() {
 
   const loadBuses = async () => {
     try {
-      const { data } = await busAPI.getAll();
+      const { data } = await busAPI.getMy();
       setBuses(data);
     } catch (err) {
       console.error(err);
@@ -235,8 +235,7 @@ function ScannerPage() {
                   <select className="form-select" value={selectedBus}
                     onChange={(e) => setSelectedBus(e.target.value)}>
                     <option value="">Select Bus</option>
-                    {buses.filter(b => b.driver?._id === JSON.parse(localStorage.getItem('user') || '{}')._id)
-                      .map((b) => (
+              {buses.map((b) => (
                         <option key={b._id} value={b._id}>
                           {b.busNumber} - {b.plateNumber}
                         </option>

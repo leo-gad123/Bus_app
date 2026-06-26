@@ -12,6 +12,16 @@ function PassengerDashboard() {
   const [qrCode, setQrCode] = useState(null);
   const [message, setMessage] = useState('');
 
+  const handleCancel = async (ticketId) => {
+    try {
+      await ticketAPI.cancel(ticketId);
+      setMessage('Ticket cancelled');
+      loadTickets();
+    } catch (err) {
+      setMessage(err.response?.data?.error || 'Failed to cancel ticket');
+    }
+  };
+
   useEffect(() => {
     loadRoutes();
     loadTickets();
@@ -155,6 +165,7 @@ function PassengerDashboard() {
                 <th>Fare</th>
                 <th>Status</th>
                 <th>Date</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -168,10 +179,17 @@ function PassengerDashboard() {
                     </span>
                   </td>
                   <td>{new Date(t.createdAt).toLocaleString()}</td>
+                  <td>
+                    {t.status === 'active' && (
+                      <button className="btn btn-danger btn-sm" onClick={() => handleCancel(t._id)}>
+                        Cancel
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {tickets.length === 0 && (
-                <tr><td colSpan="4" className="text-center">No tickets yet</td></tr>
+                <tr><td colSpan="5" className="text-center">No tickets yet</td></tr>
               )}
             </tbody>
           </table>

@@ -9,7 +9,7 @@ function AdminDashboard() {
   const [tickets, setTickets] = useState([]);
 
   const [routeForm, setRouteForm] = useState({ name: '', startLocation: '', endLocation: '', baseFare: '' });
-  const [busForm, setBusForm] = useState({ plateNumber: '', busNumber: '', capacity: '' });
+  const [busForm, setBusForm] = useState({ plateNumber: '', busNumber: '', capacity: '', driver: '', route: '' });
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -58,9 +58,9 @@ function AdminDashboard() {
   const handleAddBus = async (e) => {
     e.preventDefault();
     try {
-      await busAPI.create({ ...busForm, capacity: parseInt(busForm.capacity) });
+      await busAPI.create({ ...busForm, capacity: parseInt(busForm.capacity), driver: busForm.driver || undefined, route: busForm.route || undefined });
       setMessage('Bus added');
-      setBusForm({ plateNumber: '', busNumber: '', capacity: '' });
+      setBusForm({ plateNumber: '', busNumber: '', capacity: '', driver: '', route: '' });
       loadAll();
     } catch (err) {
       setMessage(err.response?.data?.error || 'Failed');
@@ -168,6 +168,24 @@ function AdminDashboard() {
                   <div className="mb-2">
                     <input className="form-control" type="number" placeholder="Capacity" value={busForm.capacity}
                       onChange={(e) => setBusForm({ ...busForm, capacity: e.target.value })} required />
+                  </div>
+                  <div className="mb-2">
+                    <select className="form-select" value={busForm.driver}
+                      onChange={(e) => setBusForm({ ...busForm, driver: e.target.value })}>
+                      <option value="">Select Driver</option>
+                      {users.filter(u => u.role === 'driver').map((u) => (
+                        <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-2">
+                    <select className="form-select" value={busForm.route}
+                      onChange={(e) => setBusForm({ ...busForm, route: e.target.value })}>
+                      <option value="">Select Route</option>
+                      {routes.map((r) => (
+                        <option key={r._id} value={r._id}>{r.name} ({r.startLocation} → {r.endLocation})</option>
+                      ))}
+                    </select>
                   </div>
                   <button className="btn btn-primary w-100" type="submit">Add Bus</button>
                 </form>

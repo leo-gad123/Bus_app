@@ -129,6 +129,24 @@ router.get('/my', auth, async (req, res) => {
   }
 });
 
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    if (ticket.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Not authorized to delete this ticket' });
+    }
+    if (ticket.status === 'used') {
+      return res.status(400).json({ error: 'Cannot delete a used ticket' });
+    }
+    ticket.status = 'cancelled';
+    await ticket.save();
+    res.json({ message: 'Ticket cancelled successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.get('/', auth, async (req, res) => {
   try {
     const { status } = req.query;

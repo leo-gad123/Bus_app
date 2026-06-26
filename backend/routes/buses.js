@@ -13,6 +13,15 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+router.get('/my', auth, async (req, res) => {
+  try {
+    const buses = await Bus.find({ driver: req.user._id }).populate('route');
+    res.json(buses);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.get('/:id', auth, async (req, res) => {
   try {
     const bus = await Bus.findById(req.params.id).populate('driver').populate('route');

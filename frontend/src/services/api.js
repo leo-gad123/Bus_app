@@ -35,6 +35,7 @@ export const userAPI = {
 
 export const busAPI = {
   getAll: () => API.get('/buses'),
+  getMy: () => API.get('/buses/my'),
   getById: (id) => API.get(`/buses/${id}`),
   create: (data) => API.post('/buses', data),
   update: (id, data) => API.put(`/buses/${id}`, data),
@@ -58,6 +59,7 @@ export const ticketAPI = {
   startTrip: (busId) => API.post('/tickets/trip/start', { busId }),
   endTrip: (id) => API.put(`/tickets/trip/${id}/end`),
   activeTrips: () => API.get('/tickets/trips/active'),
+  cancel: (id) => API.delete(`/tickets/${id}`),
 };
 
 export default API;

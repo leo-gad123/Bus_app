@@ -20,11 +20,12 @@ function Register() {
   };
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-6">
-        <div className="card">
-          <div className="card-body">
-            <h3 className="card-title text-center mb-4">Register</h3>
+    <div className="login-page">
+      <div className="row justify-content-center">
+        <div className="col-md-8 col-lg-6 col-xl-5">
+          <div className="card">
+            <div className="card-body">
+              <h3 className="card-title text-center mb-4">Register</h3>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -53,7 +54,6 @@ function Register() {
                   onChange={(e) => setForm({ ...form, role: e.target.value })}>
                   <option value="passenger">Passenger</option>
                   <option value="driver">Driver</option>
-                  <option value="admin">Admin</option>
                 </select>
               </div>
               <button type="submit" className="btn btn-primary w-100">Register</button>
@@ -64,6 +64,7 @@ function Register() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
