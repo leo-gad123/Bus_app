@@ -4,7 +4,7 @@ const Trip = require('../models/Trip');
 const Route = require('../models/Route');
 const Bus = require('../models/Bus');
 const { auth, driverAuth } = require('../middleware/auth');
-const { generateQRSecret, generateQRToken, generateQRCode, verifyQRToken } = require('../utils/qr');
+const { generateQRSecret, generateQRToken, generateQRCode, decodeQRCode, verifyQRToken } = require('../utils/qr');
 
 const router = express.Router();
 
@@ -24,20 +24,34 @@ router.post('/purchase', auth, async (req, res) => {
 
     const secret = generateQRSecret();
     const token = generateQRToken(secret);
-    const qrData = JSON.stringify({ userId: req.user._id, routeId, fare, token, timestamp: Date.now() });
-    const qrCode = await generateQRCode(qrData);
 
     const ticket = new Ticket({
       user: req.user._id,
       route: routeId,
-      qrCode,
-      qrSecret: secret,
+      qrCode: 'pending',
+      qrSecret: 'pending',
       fare,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
     });
     await ticket.save();
 
-    res.status(201).json({ ticket, qrCode });
+    const qrPayload = await generateQRCode({
+      ticketId: ticket._id.toString(),
+      routeId,
+      fare,
+      token,
+      timestamp: Date.now()
+    });
+
+    ticket.qrCode = qrPayload;
+    ticket.qrSecret = secret;
+    await ticket.save();
+
+    res.status(201).json({
+      ticket,
+      qrCode: qrPayload,
+      updatedBalance: req.user.walletBalance
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -46,13 +60,26 @@ router.post('/purchase', auth, async (req, res) => {
 router.post('/verify', driverAuth, async (req, res) => {
   try {
     const { qrData } = req.body;
-    const parsed = typeof qrData === 'string' ? JSON.parse(qrData) : qrData;
+    let parsed = qrData;
 
-    const ticket = await Ticket.findOne({
-      user: parsed.userId,
-      route: parsed.routeId,
-      status: 'active'
-    }).populate('user', 'name email');
+    if (typeof qrData === 'string') {
+      parsed = decodeQRCode(qrData) || { ticketId: qrData };
+    }
+
+    const ticketId = parsed.ticketId || parsed._id || parsed.id;
+    let ticket = null;
+
+    if (ticketId) {
+      ticket = await Ticket.findById(ticketId).populate('user', 'name email');
+    }
+
+    if (!ticket) {
+      ticket = await Ticket.findOne({
+        user: parsed.userId,
+        route: parsed.routeId,
+        status: 'active'
+      }).populate('user', 'name email');
+    }
 
     if (!ticket) return res.status(404).json({ error: 'Ticket not found', valid: false });
 

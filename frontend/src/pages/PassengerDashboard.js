@@ -57,9 +57,9 @@ function PassengerDashboard() {
       const { data } = await ticketAPI.purchase(selectedRoute);
       setQrCode(data.qrCode);
       setMessage('Ticket purchased successfully!');
-      setBalance(data.ticket.user?.walletBalance || balance - data.ticket.fare);
+      setBalance(data.updatedBalance ?? balance);
       const stored = JSON.parse(localStorage.getItem('user') || '{}');
-      stored.walletBalance = balance - data.ticket.fare;
+      stored.walletBalance = data.updatedBalance ?? (stored.walletBalance - (data.ticket?.fare || 0));
       localStorage.setItem('user', JSON.stringify(stored));
       loadTickets();
     } catch (err) {

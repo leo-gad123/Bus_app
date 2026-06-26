@@ -1,5 +1,4 @@
 const speakeasy = require('speakeasy');
-const QRCode = require('qrcode');
 
 function generateQRSecret() {
   return speakeasy.generateSecret({ length: 20 }).base32;
@@ -24,7 +23,23 @@ function verifyQRToken(secret, token) {
 }
 
 async function generateQRCode(data) {
-  return QRCode.toDataURL(JSON.stringify(data));
+  return Buffer.from(JSON.stringify(data)).toString('base64');
 }
 
-module.exports = { generateQRSecret, generateQRToken, verifyQRToken, generateQRCode };
+function decodeQRCode(value) {
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+    return parsed;
+  } catch {
+    try {
+      const decoded = Buffer.from(value, 'base64').toString('utf8');
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
+  }
+}
+
+module.exports = { generateQRSecret, generateQRToken, verifyQRToken, generateQRCode, decodeQRCode };
