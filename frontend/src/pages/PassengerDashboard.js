@@ -67,6 +67,14 @@ function PassengerDashboard() {
     }
   };
 
+  const handleDownloadQr = () => {
+    if (!qrCode) return;
+    const link = document.createElement('a');
+    link.href = `data:image/png;base64,${qrCode}`;
+    link.download = 'ticket-qr.png';
+    link.click();
+  };
+
   return (
     <div>
       <div className="row mb-4">
@@ -127,6 +135,9 @@ function PassengerDashboard() {
                 <div className="d-flex justify-content-center bg-white p-3">
                   <QRCode value={qrCode} size={256} />
                 </div>
+                <button className="btn btn-outline-success btn-sm mt-3" onClick={handleDownloadQr}>
+                  Save QR Image
+                </button>
                 <p className="mt-2 text-muted">Show this QR to the bus scanner</p>
               </div>
             </div>
