@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: smart-ebus-backend
+    runtime: node
+    repo: https://github.com/leo-gad123/Bus_app.git
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
