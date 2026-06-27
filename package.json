@@ -8,10 +8,11 @@
     "electron:build-frontend": "cd frontend && npm run build",
     "electron:start": "npm run electron:build-frontend && electron .",
     "electron:dev": "electron .",
-    "dist": "npm run electron:build-frontend && electron-builder build --win",
-    "dist:win": "npm run electron:build-frontend && electron-builder build --win",
-    "dist:linux": "npm run electron:build-frontend && electron-builder build --linux",
-    "dist:mac": "npm run electron:build-frontend && electron-builder build --mac"
+    "predist": "cd backend && npm install",
+    "dist": "npm run electron:build-frontend && npx electron-builder build --win",
+    "dist:win": "npm run electron:build-frontend && npx electron-builder build --win",
+    "dist:linux": "npm run electron:build-frontend && npx electron-builder build --linux",
+    "dist:mac": "npm run electron:build-frontend && npx electron-builder build --mac"
   },
   "build": {
     "appId": "com.smartebus.desktop",
