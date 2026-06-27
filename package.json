@@ -4,12 +4,46 @@
   "description": "Smart E-Bus Desktop App",
   "main": "electron/main.js",
   "scripts": {
-    "electron:build": "cd frontend && npm run build",
-    "electron:start": "npm run electron:build && electron .",
-    "electron:dev": "electron ."
+    "postinstall": "cd backend && npm install",
+    "electron:build-frontend": "cd frontend && npm run build",
+    "electron:start": "npm run electron:build-frontend && electron .",
+    "electron:dev": "electron .",
+    "dist": "npm run electron:build-frontend && electron-builder build --win",
+    "dist:win": "npm run electron:build-frontend && electron-builder build --win",
+    "dist:linux": "npm run electron:build-frontend && electron-builder build --linux",
+    "dist:mac": "npm run electron:build-frontend && electron-builder build --mac"
+  },
+  "build": {
+    "appId": "com.smartebus.desktop",
+    "productName": "Smart E-Bus",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "backend/**/*",
+      "backend/node_modules/**/*",
+      "frontend/build/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
   },
   "devDependencies": {
-    "electron": "^33.0.0"
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
   },
   "engines": {
     "node": "24.x"
