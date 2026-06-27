@@ -8,7 +8,6 @@ function ScannerPage() {
   const detectorRef = useRef(null);
   const scanningRef = useRef(false);
 
-  const [qrInput, setQrInput] = useState('');
   const [result, setResult] = useState(null);
   const [buses, setBuses] = useState([]);
   const [selectedBus, setSelectedBus] = useState('');
@@ -16,7 +15,6 @@ function ScannerPage() {
   const [message, setMessage] = useState('');
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     loadBuses();
@@ -122,7 +120,6 @@ function ScannerPage() {
             const scannedValue = barcodes[0].rawValue;
             if (scannedValue) {
               scanningRef.current = true;
-              setQrInput(scannedValue);
               await verifyTicket(scannedValue);
               setTimeout(() => {
                 scanningRef.current = false;
@@ -162,61 +159,6 @@ function ScannerPage() {
     }
   };
 
-  const handleVerify = async () => {
-    await verifyTicket(qrInput);
-  };
-
-  const handleImageUpload = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    setMessage('Reading QR image...');
-
-    try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const imageDataUrl = reader.result;
-          const img = new Image();
-          img.onload = async () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const context = canvas.getContext('2d');
-            context.drawImage(img, 0, 0);
-
-            if (typeof window.BarcodeDetector !== 'undefined') {
-              const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-              const barcode = await detector.detect(canvas);
-              const value = barcode?.[0]?.rawValue;
-              if (value) {
-                setQrInput(value);
-                await verifyTicket(value);
-              } else {
-                setResult({ valid: false, error: 'No QR code found in image' });
-                setMessage('No QR code found in image');
-              }
-            } else {
-              setResult({ valid: false, error: 'QR image scanning is not supported in this browser' });
-              setMessage('QR image scanning is not supported in this browser');
-            }
-          };
-          img.src = imageDataUrl;
-        } catch (err) {
-          setResult({ valid: false, error: 'Failed to read QR image' });
-          setMessage('Failed to read QR image');
-        } finally {
-          setIsUploading(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      setMessage('Failed to upload image');
-      setIsUploading(false);
-    }
-  };
-
   return (
     <div>
       <div className="row mb-4">
@@ -250,19 +192,6 @@ function ScannerPage() {
         </div>
       </div>
 
-      <div className="row mb-4">
-        <div className="col-12">
-          <div className="card bg-light">
-            <div className="card-body py-2 d-flex justify-content-between align-items-center">
-              <span className="text-muted small">
-                <strong>Hardware scanner:</strong> Use the Python QR scanner in the <code>hard_scanner/</code> directory for dedicated camera-based scanning.
-              </span>
-              <a href="hard_scanner/README.md" className="btn btn-outline-secondary btn-sm" target="_blank" rel="noreferrer">Docs</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {message && <div className={`alert ${result?.valid ? 'alert-success' : 'alert-info'}`}>{message}</div>}
 
       <div className="row mb-4">
@@ -270,14 +199,13 @@ function ScannerPage() {
           <div className="card">
             <div className="card-body">
               <h5>Scan QR Ticket</h5>
-              <p className="text-muted">Paste QR code data or scan from camera</p>
+              <p className="text-muted">Point the camera at the passenger ticket QR code</p>
 
               <div className="d-flex gap-2 mb-3">
                 <button className="btn btn-outline-primary" onClick={startCameraScan}>
                   {cameraOpen ? 'Close Camera' : 'Open Camera'}
                 </button>
                 <button className="btn btn-outline-secondary" onClick={() => {
-                  setQrInput('');
                   setResult(null);
                   setMessage('');
                   setCameraError('');
@@ -293,19 +221,6 @@ function ScannerPage() {
                   <p className="text-muted small mt-2">Camera is running. Hold the ticket QR in front of the camera.</p>
                 </div>
               )}
-
-              <div className="mb-3">
-                <label className="form-label">Upload saved QR image</label>
-                <input type="file" className="form-control" accept="image/*" onChange={handleImageUpload} />
-              </div>
-
-              <div className="mb-3">
-                <textarea className="form-control" rows="3"
-                  placeholder="Paste QR data here..."
-                  value={qrInput} onChange={(e) => setQrInput(e.target.value)} />
-              </div>
-              <button className="btn btn-primary w-100" onClick={handleVerify}
-                disabled={!qrInput.trim() || isUploading}>Verify Ticket</button>
 
               {result && (
                 <div className={`mt-3 p-3 rounded ${result.valid ? 'bg-success text-white' : 'bg-danger text-white'}`}>
