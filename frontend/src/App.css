@@ -806,6 +806,267 @@ p.text-success {
   border-color: var(--green-light) !important;
 }
 
+/* ===== ADMIN DASHBOARD ===== */
+.admin-users-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-users-header h5 {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.admin-users-search {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  max-width: 500px;
+}
+
+.admin-search-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.admin-search-input {
+  padding-left: 40px !important;
+}
+
+.admin-search-icon {
+  position: absolute;
+  left: 13px;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.admin-role-select {
+  width: auto !important;
+  min-width: 140px;
+}
+
+.admin-users-count {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  display: inline-block;
+}
+
+.status-indicator.active {
+  background: var(--green-primary);
+}
+
+/* Mobile: label prefixes on data cells */
+@media (max-width: 576px) {
+  .data-cell[data-label]::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 2px;
+  }
+}
+
+/* Nav tabs horizontal scroll on small screens */
+.nav-tabs {
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+@media (max-width: 768px) {
+  .nav-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0 !important;
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tabs .nav-link {
+    white-space: nowrap;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+  }
+}
+
+/* Admin form + table side-by-side on desktop, stacked on mobile */
+@media (max-width: 767px) {
+  .admin-form-col,
+  .admin-table-col {
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ===== PROFILE PAGE ===== */
+.profile-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--green-subtle);
+  border: 3px solid var(--green-light);
+  transition: var(--transition);
+}
+
+.profile-avatar:hover {
+  border-color: var(--green-primary);
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-initials {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--green-primary);
+  line-height: 1;
+}
+
+.profile-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  color: white;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.profile-avatar:hover .profile-avatar-overlay {
+  opacity: 1;
+}
+
+.admin-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.admin-user-avatar-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--green-subtle);
+  color: var(--green-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.navbar-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.navbar-avatar-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--green-subtle);
+  color: var(--green-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+/* ===== ADMIN STAT CARDS ===== */
+.stat-card {
+  border-radius: var(--radius-lg) !important;
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl) !important;
+}
+
+.stat-card .card-body {
+  padding: 1.25rem !important;
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.stat-subs {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 576px) {
   .container {
@@ -869,7 +1130,7 @@ p.text-success {
     font-size: 0.85rem;
   }
 
-  .d-flex.gap-2 {
+  .d-flex.gap-2:not(.admin-users-search) {
     flex-direction: column;
     gap: 0.5rem !important;
   }
@@ -894,7 +1155,7 @@ p.text-success {
   }
 
   .nav-tabs .nav-link {
-    padding: 8px 14px;
+    padding: 10px 16px;
     font-size: 0.82rem;
   }
 
@@ -923,6 +1184,29 @@ p.text-success {
 
   textarea.form-control {
     min-height: 60px;
+  }
+
+  .admin-users-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
+  .admin-users-header h5 {
+    margin: 0;
+    text-align: center;
+  }
+
+  .admin-users-search {
+    flex-direction: column;
+  }
+
+  .admin-role-select {
+    width: 100% !important;
+  }
+
+  .admin-users-count {
+    text-align: center;
   }
 }
 

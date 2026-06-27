@@ -1,22 +1,43 @@
+const fs = require('fs');
 const express = require('express');
+const path = require('path');
+const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/avatars');
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar-${req.user._id}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|gif|webp/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mime = allowed.test((file.mimetype || '').split('/')[1]);
+    if (ext && mime) return cb(null, true);
+    cb(new Error('Only image files (jpg, png, gif, webp) are allowed'));
+  }
+});
+
 router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password, role } = req.body;
-
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ error: 'Email already registered' });
-
     const user = new User({ name, email, phone, password, role: role || 'passenger' });
     await user.save();
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ user, token });
+    res.status(201).json({ message: 'Registration successful. You can now log in.' });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -41,6 +62,60 @@ router.post('/login', async (req, res) => {
 
 router.get('/profile', auth, async (req, res) => {
   res.json(req.user);
+});
+
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { name, phone, avatar } = req.body;
+    if (name !== undefined) req.user.name = name;
+    if (phone !== undefined) req.user.phone = phone;
+    if (avatar !== undefined) req.user.avatar = avatar;
+    await req.user.save();
+    res.json(req.user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    if (req.user.avatar) {
+      const oldPath = path.join(__dirname, '..', req.user.avatar);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+    const base = `${req.protocol}://${req.get('host')}`;
+    const avatarUrl = `${base}/uploads/avatars/${req.file.filename}`;
+    req.user.avatar = avatarUrl;
+    await req.user.save();
+    res.json({ avatar: avatarUrl, user: req.user });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}, (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'File too large (max 5MB)' });
+    return res.status(400).json({ error: err.message });
+  }
+  if (err) return res.status(400).json({ error: err.message });
+  next();
+});
+
+router.put('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Current and new password required' });
+    if (newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+    const isMatch = await req.user.comparePassword(currentPassword);
+    if (!isMatch) return res.status(401).json({ error: 'Current password is incorrect' });
+
+    req.user.password = newPassword;
+    await req.user.save();
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 module.exports = router;

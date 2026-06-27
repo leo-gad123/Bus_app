@@ -1,8 +1,42 @@
 const express = require('express');
 const User = require('../models/User');
+const Bus = require('../models/Bus');
+const Route = require('../models/Route');
+const Ticket = require('../models/Ticket');
+const Trip = require('../models/Trip');
 const { auth, adminAuth } = require('../middleware/auth');
 
 const router = express.Router();
+
+router.get('/stats', adminAuth, async (req, res) => {
+  try {
+    const [totalUsers, totalBuses, totalRoutes, totalTickets, totalTrips, revenue] = await Promise.all([
+      User.countDocuments(),
+      Bus.countDocuments(),
+      Route.countDocuments(),
+      Ticket.countDocuments(),
+      Trip.countDocuments(),
+      Ticket.aggregate([{ $group: { _id: null, total: { $sum: '$fare' } } }]),
+    ]);
+    const byRole = await User.aggregate([{ $group: { _id: '$role', count: { $sum: 1 } } }]);
+    const byTicketStatus = await Ticket.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]);
+    const activeTrips = await Trip.countDocuments({ status: 'active' });
+
+    res.json({
+      totalUsers,
+      totalBuses,
+      totalRoutes,
+      totalTickets,
+      totalTrips,
+      activeTrips,
+      revenue: revenue.length > 0 ? revenue[0].total : 0,
+      usersByRole: Object.fromEntries(byRole.map(r => [r._id, r.count])),
+      ticketsByStatus: Object.fromEntries(byTicketStatus.map(r => [r._id, r.count])),
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 router.get('/', adminAuth, async (req, res) => {
   try {

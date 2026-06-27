@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 import PassengerDashboard from './pages/PassengerDashboard';
 import ScannerPage from './pages/ScannerPage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -50,6 +51,11 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          } />
           <Route path="/dashboard" element={
             <PrivateRoute roles={['passenger']}>
               <PassengerDashboard />

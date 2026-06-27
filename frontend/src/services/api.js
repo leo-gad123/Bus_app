@@ -24,6 +24,14 @@ export const authAPI = {
   register: (data) => API.post('/auth/register', data),
   login: (data) => API.post('/auth/login', data),
   profile: () => API.get('/auth/profile'),
+  updateProfile: (data) => API.put('/auth/profile', data),
+  uploadAvatar: (file) => {
+    const fd = new FormData();
+    fd.append('avatar', file);
+    return API.post('/auth/avatar', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  changePassword: (data) => API.put('/auth/change-password', data),
+
 };
 
 export const userAPI = {
@@ -31,6 +39,7 @@ export const userAPI = {
   getAll: () => API.get('/users'),
   getById: (id) => API.get(`/users/${id}`),
   update: (id, data) => API.put(`/users/${id}`, data),
+  getStats: () => API.get('/users/stats'),
 };
 
 export const busAPI = {

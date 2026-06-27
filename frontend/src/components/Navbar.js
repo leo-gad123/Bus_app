@@ -39,7 +39,15 @@ function Navbar() {
             {user?.role === 'admin' && (
               <li className="nav-item"><Link className="nav-link" to="/admin" onClick={closeNav}>Admin</Link></li>
             )}
-            <li className="nav-item">
+            <li className="nav-item"><Link className="nav-link" to="/profile" onClick={closeNav}>Profile</Link></li>
+            <li className="nav-item d-flex align-items-center">
+              {user?.avatar ? (
+                <img src={user.avatar.startsWith('/uploads') ? `http://localhost:5000${user.avatar}` : user.avatar} alt="" className="navbar-avatar me-1" />
+              ) : (
+                <span className="navbar-avatar-placeholder me-1">
+                  {user?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'}
+                </span>
+              )}
               <span className="nav-link">
                 {user?.name} ({user?.role})
               </span>
