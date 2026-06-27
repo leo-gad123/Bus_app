@@ -1,4 +1,16 @@
 {
+  "name": "smart-ebus-desktop",
+  "version": "1.0.0",
+  "description": "Smart E-Bus Desktop App",
+  "main": "electron/main.js",
+  "scripts": {
+    "electron:build": "cd frontend && npm run build",
+    "electron:start": "npm run electron:build && electron .",
+    "electron:dev": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
   "engines": {
     "node": "24.x"
   }
