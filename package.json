@@ -27,6 +27,7 @@
       "frontend/build/**/*",
       "package.json"
     ],
+    "electronVersion": "33.3.1",
     "extraMetadata": {
       "main": "electron/main.js"
     },
@@ -43,7 +44,7 @@
     }
   },
   "devDependencies": {
-    "electron": "^33.0.0",
+    "electron": "33.3.1",
     "electron-builder": "^25.1.8"
   },
   "engines": {
