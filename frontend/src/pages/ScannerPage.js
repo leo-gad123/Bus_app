@@ -313,6 +313,7 @@ function ScannerPage() {
                   {result.valid ? (
                     <div>
                       <p>Passenger: {result.ticket?.passengerName}</p>
+                      {result.ticket?.beneficiaryName && <p>For: {result.ticket.beneficiaryName}{result.ticket.beneficiaryPhone ? ` (${result.ticket.beneficiaryPhone})` : ''}</p>}
                       <p>Fare: ${result.ticket?.fare}</p>
                       <p>Used at: {new Date(result.ticket?.usedAt).toLocaleTimeString()}</p>
                     </div>

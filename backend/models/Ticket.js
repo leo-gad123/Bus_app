@@ -5,6 +5,8 @@ const ticketSchema = new mongoose.Schema({
   trip: { type: mongoose.Schema.Types.ObjectId, ref: 'Trip' },
   route: { type: mongoose.Schema.Types.ObjectId, ref: 'Route', required: true },
   bus: { type: mongoose.Schema.Types.ObjectId, ref: 'Bus' },
+  beneficiaryName: { type: String, default: '' },
+  beneficiaryPhone: { type: String, default: '' },
   qrCode: { type: String, required: true },
   qrSecret: { type: String, required: true },
   fare: { type: Number, required: true },

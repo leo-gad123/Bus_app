@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post('/purchase', auth, async (req, res) => {
   try {
-    const { routeId } = req.body;
+    const { routeId, beneficiaryName, beneficiaryPhone } = req.body;
     const route = await Route.findById(routeId);
     if (!route) return res.status(404).json({ error: 'Route not found' });
 
@@ -28,6 +28,8 @@ router.post('/purchase', auth, async (req, res) => {
     const ticket = new Ticket({
       user: req.user._id,
       route: routeId,
+      beneficiaryName: beneficiaryName || '',
+      beneficiaryPhone: beneficiaryPhone || '',
       qrCode: 'pending',
       qrSecret: 'pending',
       fare,
@@ -110,6 +112,8 @@ router.post('/verify', driverAuth, async (req, res) => {
         id: ticket._id,
         fare: ticket.fare,
         passengerName: ticket.user.name,
+        beneficiaryName: ticket.beneficiaryName,
+        beneficiaryPhone: ticket.beneficiaryPhone,
         usedAt: ticket.usedAt
       }
     });

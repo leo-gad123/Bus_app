@@ -9,6 +9,8 @@ function PassengerDashboard() {
   const [tickets, setTickets] = useState([]);
   const [selectedRoute, setSelectedRoute] = useState('');
   const [topupAmount, setTopupAmount] = useState('');
+  const [beneficiaryName, setBeneficiaryName] = useState('');
+  const [beneficiaryPhone, setBeneficiaryPhone] = useState('');
   const [qrCode, setQrCode] = useState(null);
   const [selectedTicketQr, setSelectedTicketQr] = useState(null);
   const [message, setMessage] = useState('');
@@ -65,13 +67,15 @@ function PassengerDashboard() {
   const handlePurchase = async () => {
     if (!selectedRoute) return;
     try {
-      const { data } = await ticketAPI.purchase(selectedRoute);
+      const { data } = await ticketAPI.purchase(selectedRoute, beneficiaryName, beneficiaryPhone);
       setQrCode(data.qrCode);
       setMessage('Ticket purchased successfully!');
       setBalance(data.updatedBalance ?? balance);
       const stored = JSON.parse(localStorage.getItem('user') || '{}');
       stored.walletBalance = data.updatedBalance ?? (stored.walletBalance - (data.ticket?.fare || 0));
       localStorage.setItem('user', JSON.stringify(stored));
+      setBeneficiaryName('');
+      setBeneficiaryPhone('');
       loadTickets();
     } catch (err) {
       setMessage(err.response?.data?.error || 'Purchase failed');
@@ -128,6 +132,11 @@ function PassengerDashboard() {
                   </option>
                 ))}
               </select>
+              <p className="text-muted small mb-1">Book for someone (optional)</p>
+              <input type="text" className="form-control mb-1" placeholder="Beneficiary name"
+                value={beneficiaryName} onChange={(e) => setBeneficiaryName(e.target.value)} />
+              <input type="tel" className="form-control mb-2" placeholder="Beneficiary phone"
+                value={beneficiaryPhone} onChange={(e) => setBeneficiaryPhone(e.target.value)} />
               <button className="btn btn-primary w-100" onClick={handlePurchase}
                 disabled={!selectedRoute}>
                 Purchase Ticket
@@ -171,6 +180,9 @@ function PassengerDashboard() {
                 <p className="mt-2 mb-0 text-muted">
                   {selectedTicketQr.route?.startLocation} → {selectedTicketQr.route?.endLocation} | FRW {selectedTicketQr.fare}
                 </p>
+                {selectedTicketQr.beneficiaryName && (
+                  <p className="mb-0 text-muted">For: {selectedTicketQr.beneficiaryName}{selectedTicketQr.beneficiaryPhone ? ` (${selectedTicketQr.beneficiaryPhone})` : ''}</p>
+                )}
                 <p className="text-muted">Show this QR to the bus scanner</p>
               </div>
             </div>
@@ -181,11 +193,12 @@ function PassengerDashboard() {
       <div className="card">
         <div className="card-body">
           <h5>Ticket History</h5>
-          <div className="data-table" style={{ '--table-cols': '1.5fr 0.7fr 0.7fr 1fr 0.7fr' }}>
+          <div className="data-table" style={{ '--table-cols': '1.5fr 0.7fr 0.7fr 1fr 1fr 0.7fr' }}>
             <div className="data-table-header">
               <span>Route</span>
               <span>Fare</span>
               <span>Status</span>
+              <span>For</span>
               <span>Date</span>
               <span>Action</span>
             </div>
@@ -197,6 +210,13 @@ function PassengerDashboard() {
                   <span className={`badge bg-${t.status === 'active' ? 'success' : t.status === 'used' ? 'secondary' : 'danger'}`}>
                     {t.status}
                   </span>
+                </div>
+                <div className="data-cell">
+                  {t.beneficiaryName ? (
+                    <span style={{ fontSize: '0.82rem' }}>{t.beneficiaryName}{t.beneficiaryPhone ? ` (${t.beneficiaryPhone})` : ''}</span>
+                  ) : (
+                    <span className="text-muted" style={{ fontSize: '0.82rem' }}>Self</span>
+                  )}
                 </div>
                 <div className="data-cell" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{new Date(t.createdAt).toLocaleString()}</div>
                 <div className="data-cell">

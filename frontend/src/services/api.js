@@ -62,7 +62,7 @@ export const routeAPI = {
 };
 
 export const ticketAPI = {
-  purchase: (routeId) => API.post('/tickets/purchase', { routeId }),
+  purchase: (routeId, beneficiaryName, beneficiaryPhone) => API.post('/tickets/purchase', { routeId, beneficiaryName, beneficiaryPhone }),
   verify: (qrData, busId) => API.post(`/tickets/verify${busId ? `?busId=${busId}` : ''}`, { qrData }),
   my: () => API.get('/tickets/my'),
   getAll: (status) => API.get(`/tickets${status ? `?status=${status}` : ''}`),
