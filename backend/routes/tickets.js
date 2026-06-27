@@ -120,7 +120,7 @@ router.post('/verify', driverAuth, async (req, res) => {
 
 router.get('/my', auth, async (req, res) => {
   try {
-    const tickets = await Ticket.find({ user: req.user._id })
+    const tickets = await Ticket.find({ user: req.user._id, status: { $ne: 'cancelled' } })
       .populate('route', 'name startLocation endLocation')
       .sort({ createdAt: -1 });
     res.json(tickets);

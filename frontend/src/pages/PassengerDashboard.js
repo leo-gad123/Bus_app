@@ -10,6 +10,7 @@ function PassengerDashboard() {
   const [selectedRoute, setSelectedRoute] = useState('');
   const [topupAmount, setTopupAmount] = useState('');
   const [qrCode, setQrCode] = useState(null);
+  const [selectedTicketQr, setSelectedTicketQr] = useState(null);
   const [message, setMessage] = useState('');
 
   const handleCancel = async (ticketId) => {
@@ -155,6 +156,28 @@ function PassengerDashboard() {
         </div>
       )}
 
+      {selectedTicketQr && (
+        <div className="row mb-4">
+          <div className="col-md-6 mx-auto">
+            <div className="card text-center">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <h5 className="mb-0">Ticket QR - {selectedTicketQr.route?.name || 'N/A'}</h5>
+                  <button className="btn-close" onClick={() => setSelectedTicketQr(null)}></button>
+                </div>
+                <div className="d-flex justify-content-center bg-white p-3">
+                  <QRCode value={selectedTicketQr.qrCode} size={256} />
+                </div>
+                <p className="mt-2 mb-0 text-muted">
+                  {selectedTicketQr.route?.startLocation} → {selectedTicketQr.route?.endLocation} | FRW {selectedTicketQr.fare}
+                </p>
+                <p className="text-muted">Show this QR to the bus scanner</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="card">
         <div className="card-body">
           <h5>Ticket History</h5>
@@ -178,7 +201,10 @@ function PassengerDashboard() {
                 <div className="data-cell" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{new Date(t.createdAt).toLocaleString()}</div>
                 <div className="data-cell">
                   {t.status === 'active' && (
-                    <button className="btn btn-danger btn-sm" onClick={() => handleCancel(t._id)}>Cancel</button>
+                    <>
+                      <button className="btn btn-outline-primary btn-sm me-1" onClick={() => setSelectedTicketQr(t)}>QR</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleCancel(t._id)}>Cancel</button>
+                    </>
                   )}
                 </div>
               </div>
