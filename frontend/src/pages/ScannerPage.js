@@ -250,6 +250,19 @@ function ScannerPage() {
         </div>
       </div>
 
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card bg-light">
+            <div className="card-body py-2 d-flex justify-content-between align-items-center">
+              <span className="text-muted small">
+                <strong>Hardware scanner:</strong> Use the Python QR scanner in the <code>hard_scanner/</code> directory for dedicated camera-based scanning.
+              </span>
+              <a href="hard_scanner/README.md" className="btn btn-outline-secondary btn-sm" target="_blank" rel="noreferrer">Docs</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {message && <div className={`alert ${result?.valid ? 'alert-success' : 'alert-info'}`}>{message}</div>}
 
       <div className="row mb-4">
