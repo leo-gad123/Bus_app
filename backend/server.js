@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -26,10 +27,24 @@ app.use('/api/routes', routeRoutes);
 app.use('/api/tickets', ticketRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const mongoState = mongoose.connection.readyState;
+  const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+  res.json({
+    status: mongoState === 1 ? 'ok' : 'degraded',
+    mongodb: states[mongoState] || 'unknown',
+    timestamp: new Date().toISOString()
+  });
 });
 
 const PORT = process.env.PORT || 5000;
+
+if (!process.env.MONGODB_URI) {
+  console.error('MISSING ENV: MONGODB_URI is not set');
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error('MISSING ENV: JWT_SECRET is not set');
+}
 
 if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
