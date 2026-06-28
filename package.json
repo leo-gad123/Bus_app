@@ -1,7 +1,7 @@
 {
-  "name": "smart-ebus-desktop",
+  "name": "e-modoka",
   "version": "1.0.0",
-  "description": "Smart E-Bus Desktop App",
+  "description": "E-modoka Desktop App",
   "main": "electron/main.js",
   "scripts": {
     "postinstall": "cd backend && npm install",
@@ -15,8 +15,8 @@
     "dist:mac": "npm run electron:build-frontend && npx electron-builder build --mac"
   },
   "build": {
-    "appId": "com.smartebus.desktop",
-    "productName": "Smart E-Bus",
+    "appId": "com.emodoka.desktop",
+    "productName": "E-modoka",
     "directories": {
       "output": "release"
     },
