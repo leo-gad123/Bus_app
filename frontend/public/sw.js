@@ -1,4 +1,4 @@
-const CACHE = 'e-modoka-v1';
+const CACHE = 'smart-ebus-v1';
 const ASSETS = [
   '/',
   '/index.html',
