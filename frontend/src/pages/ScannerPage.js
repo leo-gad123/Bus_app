@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ticketAPI, busAPI } from '../services/api';
 
 function ScannerPage() {
@@ -7,8 +7,8 @@ function ScannerPage() {
   const streamRef = useRef(null);
   const detectorRef = useRef(null);
   const scanningRef = useRef(false);
+  const scanTimerRef = useRef(null);
 
-  const [qrInput, setQrInput] = useState('');
   const [result, setResult] = useState(null);
   const [buses, setBuses] = useState([]);
   const [selectedBus, setSelectedBus] = useState('');
@@ -16,12 +16,15 @@ function ScannerPage() {
   const [message, setMessage] = useState('');
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   useEffect(() => {
     loadBuses();
     loadActiveTrip();
-    return () => stopCamera();
+    return () => {
+      stopCamera();
+      if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
+    };
   }, []);
 
   const loadBuses = async () => {
@@ -42,7 +45,7 @@ function ScannerPage() {
     }
   };
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -51,7 +54,9 @@ function ScannerPage() {
       videoRef.current.srcObject = null;
     }
     setCameraOpen(false);
-  };
+    setResult(null);
+    setMessage('');
+  }, []);
 
   const verifyTicket = async (value) => {
     const code = (value || '').trim();
@@ -60,7 +65,7 @@ function ScannerPage() {
     try {
       const { data } = await ticketAPI.verify(code, selectedBus || undefined);
       setResult(data);
-      setMessage(data.valid ? 'Ticket verified!' : 'Invalid ticket');
+      setMessage(data.valid ? 'Ticket verified! ✓' : 'Invalid ticket ✗');
     } catch (err) {
       setResult({ valid: false, error: err.response?.data?.error || 'Verification failed' });
       setMessage('Verification error');
@@ -80,8 +85,11 @@ function ScannerPage() {
 
     try {
       setCameraError('');
+      setResult(null);
+      setMessage('');
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
       });
 
       streamRef.current = stream;
@@ -92,10 +100,15 @@ function ScannerPage() {
 
       if (typeof window.BarcodeDetector !== 'undefined') {
         detectorRef.current = new window.BarcodeDetector({ formats: ['qr_code'] });
+      } else {
+        setCameraError('BarcodeDetector API not supported. Use a Chromium-based browser.');
+        stopCamera();
+        return;
       }
 
       setCameraOpen(true);
-      setMessage('Camera ready. Point it at the ticket QR code.');
+      setIsScanning(true);
+      setMessage('Camera ready. Point at a QR code.');
       scanFrame();
     } catch (err) {
       setCameraError('Unable to access the camera. Please allow camera permission and try again.');
@@ -122,11 +135,15 @@ function ScannerPage() {
             const scannedValue = barcodes[0].rawValue;
             if (scannedValue) {
               scanningRef.current = true;
-              setQrInput(scannedValue);
+              setIsScanning(false);
+              setMessage('QR detected! Verifying...');
               await verifyTicket(scannedValue);
-              setTimeout(() => {
+              if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
+              scanTimerRef.current = setTimeout(() => {
                 scanningRef.current = false;
-              }, 2500);
+                setIsScanning(true);
+                setMessage('Camera ready. Point at a QR code.');
+              }, 3000);
             }
           }
         } catch (err) {
@@ -162,59 +179,10 @@ function ScannerPage() {
     }
   };
 
-  const handleVerify = async () => {
-    await verifyTicket(qrInput);
-  };
-
-  const handleImageUpload = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    setMessage('Reading QR image...');
-
-    try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const imageDataUrl = reader.result;
-          const img = new Image();
-          img.onload = async () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const context = canvas.getContext('2d');
-            context.drawImage(img, 0, 0);
-
-            if (typeof window.BarcodeDetector !== 'undefined') {
-              const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-              const barcode = await detector.detect(canvas);
-              const value = barcode?.[0]?.rawValue;
-              if (value) {
-                setQrInput(value);
-                await verifyTicket(value);
-              } else {
-                setResult({ valid: false, error: 'No QR code found in image' });
-                setMessage('No QR code found in image');
-              }
-            } else {
-              setResult({ valid: false, error: 'QR image scanning is not supported in this browser' });
-              setMessage('QR image scanning is not supported in this browser');
-            }
-          };
-          img.src = imageDataUrl;
-        } catch (err) {
-          setResult({ valid: false, error: 'Failed to read QR image' });
-          setMessage('Failed to read QR image');
-        } finally {
-          setIsUploading(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      setMessage('Failed to upload image');
-      setIsUploading(false);
-    }
+  const handleClear = () => {
+    setResult(null);
+    setMessage('');
+    setCameraError('');
   };
 
   return (
@@ -250,75 +218,57 @@ function ScannerPage() {
         </div>
       </div>
 
-      <div className="row mb-4">
-        <div className="col-12">
-          <div className="card bg-light">
-            <div className="card-body py-2 d-flex justify-content-between align-items-center">
-              <span className="text-muted small">
-                <strong>Hardware scanner:</strong> Use the Python QR scanner in the <code>hard_scanner/</code> directory for dedicated camera-based scanning.
-              </span>
-              <a href="hard_scanner/README.md" className="btn btn-outline-secondary btn-sm" target="_blank" rel="noreferrer">Docs</a>
-            </div>
-          </div>
+      {message && (
+        <div className={`alert ${result?.valid ? 'alert-success' : result && !result.valid ? 'alert-danger' : 'alert-info'} d-flex justify-content-between align-items-center`}>
+          <span>{message}</span>
+          <button className="btn-close" onClick={handleClear}></button>
         </div>
-      </div>
-
-      {message && <div className={`alert ${result?.valid ? 'alert-success' : 'alert-info'}`}>{message}</div>}
+      )}
 
       <div className="row mb-4">
         <div className="col-md-8 mx-auto">
           <div className="card">
             <div className="card-body">
               <h5>Scan QR Ticket</h5>
-              <p className="text-muted">Paste QR code data or scan from camera</p>
+              <p className="text-muted">Real-time camera QR scanner. Point the camera at a ticket QR code.</p>
 
               <div className="d-flex gap-2 mb-3">
-                <button className="btn btn-outline-primary" onClick={startCameraScan}>
+                <button className={`btn ${cameraOpen ? 'btn-danger' : 'btn-primary'}`} onClick={startCameraScan}>
                   {cameraOpen ? 'Close Camera' : 'Open Camera'}
                 </button>
-                <button className="btn btn-outline-secondary" onClick={() => {
-                  setQrInput('');
-                  setResult(null);
-                  setMessage('');
-                  setCameraError('');
-                }}>Clear</button>
+                <button className="btn btn-outline-secondary" onClick={handleClear}
+                  disabled={!result && !message && !cameraError}>Clear</button>
               </div>
 
               {cameraError && <div className="alert alert-warning">{cameraError}</div>}
 
               {cameraOpen && (
-                <div className="mb-3">
-                  <video ref={videoRef} className="w-100 rounded border" playsInline muted autoPlay />
+                <div className="mb-3 position-relative">
+                  <video ref={videoRef} className="w-100 rounded border" playsInline muted autoPlay
+                    style={{ minHeight: 240, background: '#000' }} />
                   <canvas ref={canvasRef} style={{ display: 'none' }} />
-                  <p className="text-muted small mt-2">Camera is running. Hold the ticket QR in front of the camera.</p>
+                  {isScanning && (
+                    <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                      <div className="spinner-border text-light" role="status">
+                        <span className="visually-hidden">Scanning...</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              <div className="mb-3">
-                <label className="form-label">Upload saved QR image</label>
-                <input type="file" className="form-control" accept="image/*" onChange={handleImageUpload} />
-              </div>
-
-              <div className="mb-3">
-                <textarea className="form-control" rows="3"
-                  placeholder="Paste QR data here..."
-                  value={qrInput} onChange={(e) => setQrInput(e.target.value)} />
-              </div>
-              <button className="btn btn-primary w-100" onClick={handleVerify}
-                disabled={!qrInput.trim() || isUploading}>Verify Ticket</button>
-
               {result && (
-                <div className={`mt-3 p-3 rounded ${result.valid ? 'bg-success text-white' : 'bg-danger text-white'}`}>
-                  <h5>{result.valid ? 'VALID TICKET' : 'INVALID TICKET'}</h5>
+                <div className={`p-3 rounded ${result.valid ? 'bg-success text-white' : 'bg-danger text-white'}`}>
+                  <h4 className="mb-2">{result.valid ? '✓ VALID TICKET' : '✗ INVALID TICKET'}</h4>
                   {result.valid ? (
                     <div>
-                      <p>Passenger: {result.ticket?.passengerName}</p>
-                      {result.ticket?.beneficiaryName && <p>For: {result.ticket.beneficiaryName}{result.ticket.beneficiaryPhone ? ` (${result.ticket.beneficiaryPhone})` : ''}</p>}
-                      <p>Fare: ${result.ticket?.fare}</p>
-                      <p>Used at: {new Date(result.ticket?.usedAt).toLocaleTimeString()}</p>
+                      <p className="mb-1"><strong>Passenger:</strong> {result.ticket?.passengerName}</p>
+                      {result.ticket?.beneficiaryName && <p className="mb-1"><strong>For:</strong> {result.ticket.beneficiaryName}{result.ticket.beneficiaryPhone ? ` (${result.ticket.beneficiaryPhone})` : ''}</p>}
+                      <p className="mb-1"><strong>Fare:</strong> ${result.ticket?.fare}</p>
+                      <p className="mb-0"><strong>Verified at:</strong> {new Date(result.ticket?.usedAt).toLocaleTimeString()}</p>
                     </div>
                   ) : (
-                    <p>{result.error}</p>
+                    <p className="mb-0">{result.error}</p>
                   )}
                 </div>
               )}
