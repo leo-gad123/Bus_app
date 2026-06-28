@@ -195,7 +195,7 @@ function ScannerPage() {
               {activeTrip ? (
                 <div>
                   <p className="text-success">Active Trip: {activeTrip.route?.name}</p>
-                  <p>Passengers: {activeTrip.passengerCount} | Revenue: ${activeTrip.revenue}</p>
+                  <p>Passengers: {activeTrip.passengerCount} | Revenue: RWF {activeTrip.revenue}</p>
                   <button className="btn btn-danger" onClick={handleEndTrip}>End Trip</button>
                 </div>
               ) : (
@@ -264,7 +264,7 @@ function ScannerPage() {
                     <div>
                       <p className="mb-1"><strong>Passenger:</strong> {result.ticket?.passengerName}</p>
                       {result.ticket?.beneficiaryName && <p className="mb-1"><strong>For:</strong> {result.ticket.beneficiaryName}{result.ticket.beneficiaryPhone ? ` (${result.ticket.beneficiaryPhone})` : ''}</p>}
-                      <p className="mb-1"><strong>Fare:</strong> ${result.ticket?.fare}</p>
+                      <p className="mb-1"><strong>Fare:</strong> RWF {result.ticket?.fare}</p>
                       <p className="mb-0"><strong>Verified at:</strong> {new Date(result.ticket?.usedAt).toLocaleTimeString()}</p>
                     </div>
                   ) : (

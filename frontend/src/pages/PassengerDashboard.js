@@ -205,7 +205,7 @@ function PassengerDashboard() {
             {tickets.map((t) => (
               <div className="data-row" key={t._id}>
                 <div className="data-cell">{t.route?.name || 'N/A'}</div>
-                <div className="data-cell" style={{ fontWeight: 600, color: 'var(--green-primary)' }}>${t.fare}</div>
+                <div className="data-cell" style={{ fontWeight: 600, color: 'var(--green-primary)' }}>RWF {t.fare}</div>
                 <div className="data-cell">
                   <span className={`badge bg-${t.status === 'active' ? 'success' : t.status === 'used' ? 'secondary' : 'danger'}`}>
                     {t.status}

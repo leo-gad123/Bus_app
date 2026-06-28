@@ -201,7 +201,7 @@ function AdminDashboard() {
                   <div className="stat-icon" style={{ background: '#FEF2F2', color: '#DC2626' }}>
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                   </div>
-                  <div className="stat-value">${(stats.revenue || 0).toFixed(2)}</div>
+                  <div className="stat-value">RWF {(stats.revenue || 0).toFixed(2)}</div>
                   <div className="stat-label">Total Revenue</div>
                 </div>
               </div>
@@ -257,7 +257,7 @@ function AdminDashboard() {
                       <div className="data-cell" data-label="Name" style={{ fontWeight: 600 }}>{r.name}</div>
                       <div className="data-cell" data-label="From">{r.startLocation}</div>
                       <div className="data-cell" data-label="To">{r.endLocation}</div>
-                      <div className="data-cell" data-label="Fare" style={{ fontWeight: 600, color: 'var(--green-primary)' }}>${r.baseFare}</div>
+                      <div className="data-cell" data-label="Fare" style={{ fontWeight: 600, color: 'var(--green-primary)' }}>RWF {r.baseFare}</div>
                       <div className="data-cell" data-label="">
                         <button className="btn btn-danger btn-sm" onClick={() => handleDeleteRoute(r._id)}>Delete</button>
                       </div>
@@ -367,7 +367,7 @@ function AdminDashboard() {
                     <div className="data-row" key={t._id}>
                       <div className="data-cell" data-label="Passenger" style={{ fontWeight: 600 }}>{t.user?.name || 'N/A'}</div>
                       <div className="data-cell" data-label="Route">{t.route?.name || 'N/A'}</div>
-                      <div className="data-cell" data-label="Fare" style={{ fontWeight: 600, color: 'var(--green-primary)' }}>${t.fare}</div>
+                      <div className="data-cell" data-label="Fare" style={{ fontWeight: 600, color: 'var(--green-primary)' }}>RWF {t.fare}</div>
                       <div className="data-cell" data-label="Status">
                         <span className={`badge bg-${t.status === 'active' ? 'success' : t.status === 'used' ? 'secondary' : 'danger'}`}>
                           {t.status}
@@ -458,7 +458,7 @@ function UsersSection({ users, onToggleActive }) {
               <div className="data-cell" data-label="Role">
                 <span className="badge badge-role">{u.role}</span>
               </div>
-              <div className="data-cell" data-label="Balance" style={{ fontWeight: 600 }}>${u.walletBalance}</div>
+              <div className="data-cell" data-label="Balance" style={{ fontWeight: 600 }}>RWF {u.walletBalance}</div>
               <div className="data-cell" data-label="Status">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="status-dot" style={{ color: u.isActive ? 'var(--green-primary)' : 'var(--text-muted)' }}>
