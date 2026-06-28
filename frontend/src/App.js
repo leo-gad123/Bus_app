@@ -25,7 +25,7 @@ function LoadingScreen() {
             <rect x="40" y="31" width="6" height="6" rx="1" fill="#BBF7D0"/>
           </svg>
         </div>
-        <h1 className="loading-title">Smart E-Bus</h1>
+        <h1 className="loading-title">E-modoka</h1>
         <div className="loading-bar">
           <div className="loading-bar-fill" />
         </div>

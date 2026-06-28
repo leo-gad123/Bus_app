@@ -28,7 +28,7 @@ function Login() {
         <div className="col-md-8 col-lg-6 col-xl-5">
           <div className="card">
           <div className="card-body">
-            <h3 className="card-title text-center mb-4">Smart E-Bus Login</h3>
+            <h3 className="card-title text-center mb-4">E-modoka Login</h3>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
