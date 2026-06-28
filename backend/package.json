@@ -1,7 +1,7 @@
 {
-  "name": "e-modoka-backend",
+  "name": "smart-ebus-backend",
   "version": "1.0.0",
-  "description": "E-modoka QR ticketing system backend",
+  "description": "Smart E-Bus QR ticketing system backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

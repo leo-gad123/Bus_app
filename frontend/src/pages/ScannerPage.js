@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ticketAPI, busAPI } from '../services/api';
 
 function ScannerPage() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const overlayRef = useRef(null);
   const streamRef = useRef(null);
   const detectorRef = useRef(null);
   const scanningRef = useRef(false);
@@ -18,22 +17,11 @@ function ScannerPage() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [pipActive, setPipActive] = useState(false);
-  const [detectedBox, setDetectedBox] = useState(null);
 
   useEffect(() => {
     loadBuses();
     loadActiveTrip();
-
-    const onPipClose = () => setPipActive(false);
-    const video = videoRef.current;
-    if (video) {
-      video.addEventListener('leavepictureinpicture', onPipClose);
-    }
-    return () => {
-      stopCamera();
-      if (video) video.removeEventListener('leavepictureinpicture', onPipClose);
-    };
+    return () => stopCamera();
   }, []);
 
   const loadBuses = async () => {
@@ -55,9 +43,6 @@ function ScannerPage() {
   };
 
   const stopCamera = () => {
-    if (document.pictureInPictureElement) {
-      document.exitPictureInPicture().catch(() => {});
-    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -66,32 +51,6 @@ function ScannerPage() {
       videoRef.current.srcObject = null;
     }
     setCameraOpen(false);
-    setPipActive(false);
-    setDetectedBox(null);
-  };
-
-  const togglePip = useCallback(async () => {
-    if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture();
-      setPipActive(false);
-    } else if (videoRef.current && document.pictureInPictureEnabled) {
-      try {
-        await videoRef.current.requestPictureInPicture();
-        setPipActive(true);
-      } catch (err) {
-        console.error('PiP failed:', err);
-      }
-    }
-  }, []);
-
-  const toggleFullscreenCamera = () => {
-    const el = document.getElementById('camera-viewfinder');
-    if (!el) return;
-    if (document.fullscreenElement === el) {
-      document.exitFullscreen().catch(() => {});
-    } else {
-      el.requestFullscreen().catch(() => {});
-    }
   };
 
   const verifyTicket = async (value) => {
@@ -144,35 +103,6 @@ function ScannerPage() {
     }
   };
 
-  const drawOverlay = (barcodes) => {
-    const overlay = overlayRef.current;
-    const video = videoRef.current;
-    if (!overlay || !video) return;
-
-    const rect = video.getBoundingClientRect();
-    overlay.width = rect.width;
-    overlay.height = rect.height;
-    const ctx = overlay.getContext('2d');
-    ctx.clearRect(0, 0, overlay.width, overlay.height);
-
-    const sx = rect.width / video.videoWidth;
-    const sy = rect.height / video.videoHeight;
-
-    barcodes.forEach((b) => {
-      const { x, y, width, height } = b.boundingBox;
-      ctx.strokeStyle = '#22c55e';
-      ctx.lineWidth = 3;
-      ctx.shadowColor = '#22c55e';
-      ctx.shadowBlur = 10;
-      ctx.strokeRect(x * sx, y * sy, width * sx, height * sy);
-      ctx.shadowBlur = 0;
-
-      ctx.fillStyle = '#22c55e';
-      ctx.font = 'bold 14px monospace';
-      ctx.fillText('QR DETECTED', x * sx, y * sy - 6);
-    });
-  };
-
   const scanFrame = async () => {
     if (!cameraOpen || !videoRef.current || !canvasRef.current) return;
 
@@ -188,9 +118,7 @@ function ScannerPage() {
       if (detectorRef.current && !scanningRef.current) {
         try {
           const barcodes = await detectorRef.current.detect(canvas);
-          drawOverlay(barcodes);
           if (barcodes.length > 0) {
-            setDetectedBox(barcodes[0].boundingBox);
             const scannedValue = barcodes[0].rawValue;
             if (scannedValue) {
               scanningRef.current = true;
@@ -200,8 +128,6 @@ function ScannerPage() {
                 scanningRef.current = false;
               }, 2500);
             }
-          } else {
-            setDetectedBox(null);
           }
         } catch (err) {
           console.error(err);
@@ -361,34 +287,10 @@ function ScannerPage() {
               {cameraError && <div className="alert alert-warning">{cameraError}</div>}
 
               {cameraOpen && (
-                <div id="camera-viewfinder" className="mb-3 position-relative" style={{ minHeight: 240 }}>
-                  <div className="position-relative">
-                    <video ref={videoRef} className="w-100 rounded border" playsInline muted autoPlay style={{ display: 'block' }} />
-                    <canvas ref={overlayRef}
-                      className="position-absolute top-0 start-0 w-100 h-100 rounded"
-                      style={{ pointerEvents: 'none' }} />
-                    <canvas ref={canvasRef} style={{ display: 'none' }} />
-                    {detectedBox && (
-                      <div className="position-absolute top-0 end-0 m-2 badge bg-success bg-opacity-75">
-                        QR Code Detected
-                      </div>
-                    )}
-                  </div>
-                  <div className="d-flex gap-2 mt-2">
-                    <button className="btn btn-sm btn-outline-secondary" onClick={toggleFullscreenCamera}
-                      title="Fullscreen camera view">
-                      ⛶ Fullscreen
-                    </button>
-                    {document.pictureInPictureEnabled && (
-                      <button className="btn btn-sm btn-outline-info" onClick={togglePip}
-                        title="Picture-in-Picture mode">
-                        {pipActive ? 'Exit PiP' : 'PiP Mode'}
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-muted small mt-1 mb-0">
-                    Camera is running. Hold the ticket QR in front of the camera. A green box will appear when a QR code is detected.
-                  </p>
+                <div className="mb-3">
+                  <video ref={videoRef} className="w-100 rounded border" playsInline muted autoPlay />
+                  <canvas ref={canvasRef} style={{ display: 'none' }} />
+                  <p className="text-muted small mt-2">Camera is running. Hold the ticket QR in front of the camera.</p>
                 </div>
               )}
 
