@@ -28,6 +28,9 @@ function Login() {
         <div className="col-md-8 col-lg-6 col-xl-5">
           <div className="card">
           <div className="card-body">
+            <div className="text-center mb-3">
+              <img src="/logo.png" alt="Logo" height="48" style={{ borderRadius: 8 }} />
+            </div>
             <h3 className="card-title text-center mb-4">Smart E-Bus Login</h3>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
