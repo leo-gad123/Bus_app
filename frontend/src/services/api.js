@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.REACT_APP_API_URL || 'https://backend-theta-beryl-63.vercel.app/api';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const API = axios.create({ baseURL: BASE_URL });
 
 API.interceptors.request.use((config) => {
@@ -23,9 +23,13 @@ API.interceptors.response.use(
 
 export const getAvatarUrl = (avatar) => {
   if (!avatar) return '';
-  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
   const origin = BASE_URL.replace('/api', '');
-  return `${origin}${avatar}`;
+  try {
+    const path = avatar.startsWith('http') ? new URL(avatar).pathname : avatar;
+    return `${origin}${path}`;
+  } catch {
+    return avatar;
+  }
 };
 
 export const authAPI = {
