@@ -98,6 +98,17 @@ function AdminDashboard() {
     }
   };
 
+  const handleDeleteUser = async (id, name) => {
+    if (!window.confirm(`Delete user "${name}"? This will also delete all their tickets.`)) return;
+    try {
+      await userAPI.delete(id);
+      setMessage('User deleted');
+      loadAll();
+    } catch (err) {
+      setMessage(err.response?.data?.error || 'Failed to delete user');
+    }
+  };
+
   const handleDeleteBus = async (id) => {
     try {
       await busAPI.delete(id);
@@ -347,7 +358,7 @@ function AdminDashboard() {
       )}
 
       {activeTab === 'users' && (
-        <UsersSection users={users} onToggleActive={handleToggleActive} />
+        <UsersSection users={users} onToggleActive={handleToggleActive} onDeleteUser={handleDeleteUser} />
       )}
 
       {activeTab === 'tickets' && (
@@ -390,7 +401,7 @@ function AdminDashboard() {
   );
 }
 
-function UsersSection({ users, onToggleActive }) {
+function UsersSection({ users, onToggleActive, onDeleteUser }) {
   const [search, setSearch] = useState('');
   const [avatarErrors, setAvatarErrors] = useState({});
   const [roleFilter, setRoleFilter] = useState('all');
@@ -435,7 +446,7 @@ function UsersSection({ users, onToggleActive }) {
             </select>
           </div>
         </div>
-        <div className="data-table" style={{ '--table-cols': '1fr 1.2fr 1fr 0.7fr 0.7fr 0.7fr' }}>
+        <div className="data-table" style={{ '--table-cols': '1fr 1.2fr 1fr 0.7fr 0.7fr 0.7fr 0.6fr' }}>
           <div className="data-table-header">
             <span>Name</span>
             <span>Email</span>
@@ -443,6 +454,7 @@ function UsersSection({ users, onToggleActive }) {
             <span>Role</span>
             <span>Balance</span>
             <span>Status</span>
+            <span>Action</span>
           </div>
           {filtered.map(u => (
             <div className="data-row" key={u._id}>
@@ -475,6 +487,9 @@ function UsersSection({ users, onToggleActive }) {
                     {u.isActive ? 'Deactivate' : 'Activate'}
                   </button>
                 </div>
+              </div>
+              <div className="data-cell" data-label="">
+                <button className="btn btn-danger btn-sm" onClick={() => onDeleteUser(u._id, u.name)}>Delete</button>
               </div>
             </div>
           ))}

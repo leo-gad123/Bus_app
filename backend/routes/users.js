@@ -88,4 +88,18 @@ router.put('/:id', adminAuth, async (req, res) => {
   }
 });
 
+router.delete('/:id', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.role === 'admin') return res.status(403).json({ error: 'Cannot delete admin users' });
+
+    await Ticket.deleteMany({ user: user._id });
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 module.exports = router;
