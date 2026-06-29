@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { authAPI, getAvatarUrl } from '../services/api';
 
 function Profile() {
   const navigate = useNavigate();
@@ -88,7 +88,7 @@ function Profile() {
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="avatar" className="profile-avatar-img" />
                 ) : avatar ? (
-                  <img src={avatar.startsWith('/uploads') ? `http://localhost:5000${avatar}` : avatar} alt="avatar" className="profile-avatar-img" />
+                  <img src={getAvatarUrl(avatar)} alt="avatar" className="profile-avatar-img" />
                 ) : (
                   <div className="profile-avatar-initials">{initials}</div>
                 )}

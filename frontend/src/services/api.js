@@ -21,6 +21,13 @@ API.interceptors.response.use(
   }
 );
 
+export const getAvatarUrl = (avatar) => {
+  if (!avatar) return '';
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
+  const origin = BASE_URL.replace('/api', '');
+  return `${origin}${avatar}`;
+};
+
 export const authAPI = {
   register: (data) => API.post('/auth/register', data),
   login: (data) => API.post('/auth/login', data),

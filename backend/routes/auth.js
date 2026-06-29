@@ -18,6 +18,11 @@ const avatarStorage = multer.diskStorage({
   }
 });
 
+const avatarDir = path.join(__dirname, '..', 'uploads/avatars');
+if (!fs.existsSync(avatarDir)) {
+  fs.mkdirSync(avatarDir, { recursive: true });
+}
+
 const upload = multer({
   storage: avatarStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -81,11 +86,13 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     if (req.user.avatar) {
-      const oldPath = path.join(__dirname, '..', req.user.avatar);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      const oldRelativePath = req.user.avatar.startsWith('/uploads') ? req.user.avatar : null;
+      if (oldRelativePath) {
+        const oldPath = path.join(__dirname, '..', oldRelativePath);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
     }
-    const base = `${req.protocol}://${req.get('host')}`;
-    const avatarUrl = `${base}/uploads/avatars/${req.file.filename}`;
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
     req.user.avatar = avatarUrl;
     await req.user.save();
     res.json({ avatar: avatarUrl, user: req.user });

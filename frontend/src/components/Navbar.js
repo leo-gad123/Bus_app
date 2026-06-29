@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { getAvatarUrl } from '../services/api';
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
@@ -45,7 +46,7 @@ function Navbar() {
             <li className="nav-item"><Link className="nav-link" to="/profile" onClick={closeNav}>Profile</Link></li>
             <li className="nav-item d-flex align-items-center">
               {user?.avatar ? (
-                <img src={user.avatar.startsWith('/uploads') ? `http://localhost:5000${user.avatar}` : user.avatar} alt="" className="navbar-avatar me-1" />
+                <img src={getAvatarUrl(user.avatar)} alt="" className="navbar-avatar me-1" />
               ) : (
                 <span className="navbar-avatar-placeholder me-1">
                   {user?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'}

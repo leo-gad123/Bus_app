@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { busAPI, routeAPI, userAPI, ticketAPI } from '../services/api';
+import { busAPI, routeAPI, userAPI, ticketAPI, getAvatarUrl } from '../services/api';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -447,7 +447,7 @@ function UsersSection({ users, onToggleActive }) {
             <div className="data-row" key={u._id}>
               <div className="data-cell" data-label="Name" style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
                 {u.avatar ? (
-                  <img src={u.avatar.startsWith('/uploads') ? `http://localhost:5000${u.avatar}` : u.avatar} alt="" className="admin-user-avatar" />
+                  <img src={getAvatarUrl(u.avatar)} alt="" className="admin-user-avatar" />
                 ) : (
                   <span className="admin-user-avatar-placeholder">{u.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'}</span>
                 )}
