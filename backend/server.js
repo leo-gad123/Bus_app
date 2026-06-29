@@ -16,9 +16,34 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB Atlas connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+let cachedDb = null;
+async function connectDB() {
+  if (cachedDb) return cachedDb;
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    cachedDb = conn;
+    console.log('MongoDB Atlas connected');
+    return conn;
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    throw err;
+  }
+}
+connectDB();
+
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await connectDB();
+    } catch {
+      return res.status(503).json({ error: 'Database not available' });
+    }
+  }
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
