@@ -31,7 +31,7 @@ function Login() {
             <div className="text-center mb-3">
               <img src="/logo.png" alt="Logo" height="48" style={{ borderRadius: 8 }} />
             </div>
-            <h3 className="card-title text-center mb-4">Smart E-Bus Login</h3>
+            <h3 className="card-title text-center mb-4">E-modoka Login</h3>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">

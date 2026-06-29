@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: smart-ebus-backend
+    name: e-modoka-backend
     runtime: node
     repo: https://github.com/leo-gad123/Bus_app.git
     rootDir: backend

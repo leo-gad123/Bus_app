@@ -210,7 +210,7 @@ def main():
             message = ""
 
         draw_overlay(frame, status, message, stats)
-        cv2.imshow("Smart E-Bus QR Scanner", frame)
+        cv2.imshow("E-modoka QR Scanner", frame)
 
         if cv2.waitKey(1) & 0xFF == 27:
             break

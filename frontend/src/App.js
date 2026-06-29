@@ -26,7 +26,7 @@ function LoadingScreen() {
           </svg>
         </div>
           <img src="/logo.png" alt="Logo" height="48" style={{ borderRadius: 10, marginBottom: 16 }} />
-          <h1 className="loading-title">Smart E-Bus</h1>
+          <h1 className="loading-title">E-modoka</h1>
         <div className="loading-bar">
           <div className="loading-bar-fill" />
         </div>

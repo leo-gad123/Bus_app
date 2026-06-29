@@ -25,7 +25,7 @@ function Navbar() {
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/" onClick={closeNav}>
           <img src="/logo.png" alt="Logo" height="32" style={{ borderRadius: 6 }} />
-          Smart E-Bus
+          E-modoka
         </Link>
         <button className="navbar-toggler" type="button" onClick={() => setExpanded(!expanded)}
           aria-controls="navbarNav" aria-expanded={expanded} aria-label="Toggle navigation">
