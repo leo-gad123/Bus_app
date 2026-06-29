@@ -392,6 +392,7 @@ function AdminDashboard() {
 
 function UsersSection({ users, onToggleActive }) {
   const [search, setSearch] = useState('');
+  const [avatarErrors, setAvatarErrors] = useState({});
   const [roleFilter, setRoleFilter] = useState('all');
 
   const filtered = useMemo(() => {
@@ -446,8 +447,8 @@ function UsersSection({ users, onToggleActive }) {
           {filtered.map(u => (
             <div className="data-row" key={u._id}>
               <div className="data-cell" data-label="Name" style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-                {u.avatar ? (
-                  <img src={getAvatarUrl(u.avatar)} alt="" className="admin-user-avatar" />
+                {u.avatar && !avatarErrors[u._id] ? (
+                  <img src={getAvatarUrl(u.avatar)} alt="" className="admin-user-avatar" onError={() => setAvatarErrors(p => ({ ...p, [u._id]: true }))} />
                 ) : (
                   <span className="admin-user-avatar-placeholder">{u.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'}</span>
                 )}

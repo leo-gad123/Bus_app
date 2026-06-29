@@ -11,6 +11,7 @@ function Profile() {
   const [avatar, setAvatar] = useState(stored.avatar || '');
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarError, setAvatarError] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -85,10 +86,12 @@ function Profile() {
 
             <div className="text-center mb-4">
               <div className="profile-avatar" onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
-                {avatarPreview ? (
+                {avatarError ? (
+                  <div className="profile-avatar-initials">{initials}</div>
+                ) : avatarPreview ? (
                   <img src={avatarPreview} alt="avatar" className="profile-avatar-img" />
                 ) : avatar ? (
-                  <img src={getAvatarUrl(avatar)} alt="avatar" className="profile-avatar-img" />
+                  <img src={getAvatarUrl(avatar)} alt="avatar" className="profile-avatar-img" onError={() => setAvatarError(true)} />
                 ) : (
                   <div className="profile-avatar-initials">{initials}</div>
                 )}

@@ -6,6 +6,7 @@ import { getAvatarUrl } from '../services/api';
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const [expanded, setExpanded] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   const token = localStorage.getItem('token');
@@ -45,8 +46,8 @@ function Navbar() {
             )}
             <li className="nav-item"><Link className="nav-link" to="/profile" onClick={closeNav}>Profile</Link></li>
             <li className="nav-item d-flex align-items-center">
-              {user?.avatar ? (
-                <img src={getAvatarUrl(user.avatar)} alt="" className="navbar-avatar me-1" />
+              {user?.avatar && !avatarError ? (
+                <img src={getAvatarUrl(user.avatar)} alt="" className="navbar-avatar me-1" onError={() => setAvatarError(true)} />
               ) : (
                 <span className="navbar-avatar-placeholder me-1">
                   {user?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'}
