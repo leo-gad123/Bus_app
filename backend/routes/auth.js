@@ -1,6 +1,4 @@
-const fs = require('fs');
 const express = require('express');
-const path = require('path');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -8,29 +6,13 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-const avatarStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/avatars');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `avatar-${req.user._id}${ext}`);
-  }
-});
-
-const avatarDir = path.join(__dirname, '..', 'uploads/avatars');
-if (!fs.existsSync(avatarDir)) {
-  fs.mkdirSync(avatarDir, { recursive: true });
-}
-
 const upload = multer({
-  storage: avatarStorage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|gif|webp/;
-    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
     const mime = allowed.test((file.mimetype || '').split('/')[1]);
-    if (ext && mime) return cb(null, true);
+    if (mime) return cb(null, true);
     cb(new Error('Only image files (jpg, png, gif, webp) are allowed'));
   }
 });
@@ -85,17 +67,11 @@ router.put('/profile', auth, async (req, res) => {
 router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    if (req.user.avatar) {
-      const oldRelativePath = req.user.avatar.startsWith('/uploads') ? req.user.avatar : null;
-      if (oldRelativePath) {
-        const oldPath = path.join(__dirname, '..', oldRelativePath);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      }
-    }
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-    req.user.avatar = avatarUrl;
+    const base64 = req.file.buffer.toString('base64');
+    const dataUrl = `data:${req.file.mimetype};base64,${base64}`;
+    req.user.avatar = dataUrl;
     await req.user.save();
-    res.json({ avatar: avatarUrl, user: req.user });
+    res.json({ avatar: dataUrl, user: req.user });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
