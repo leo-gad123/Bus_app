@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QRCode } from 'react-qr-code';
 import { userAPI, routeAPI, ticketAPI } from '../services/api';
+import PassengerLiveLocation from '../components/PassengerLiveLocation';
 
 function PassengerDashboard() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -144,6 +145,12 @@ function PassengerDashboard() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="row mb-4">
+        <div className="col-md-12">
+          <PassengerLiveLocation />
         </div>
       </div>
 
