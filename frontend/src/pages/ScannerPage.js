@@ -17,6 +17,8 @@ function ScannerPage() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [showPaymentOverlay, setShowPaymentOverlay] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
 
   useEffect(() => {
     loadBuses();
@@ -61,6 +63,31 @@ function ScannerPage() {
   const verifyTicket = async (value) => {
     const code = (value || '').trim();
     if (!code) return;
+
+    if (code.startsWith('SIM_PAY|')) {
+      const parts = code.split('|');
+      if (parts.length >= 4) {
+        const [, passengerName, amount, timestamp] = parts;
+        const data = {
+          valid: true,
+          isSimulated: true,
+          ticket: {
+            passengerName,
+            fare: parseFloat(amount),
+            usedAt: new Date(parseInt(timestamp)).toISOString(),
+            isSimulated: true
+          }
+        };
+        setResult(data);
+        setPaymentData(data);
+        setShowPaymentOverlay(true);
+        setMessage(`Demo payment received! FRW ${parseFloat(amount).toFixed(0)} from ${passengerName}`);
+      } else {
+        setResult({ valid: false, error: 'Invalid simulated payment data' });
+        setMessage('Invalid demo payment QR');
+      }
+      return;
+    }
 
     try {
       const { data } = await ticketAPI.verify(code, selectedBus || undefined);
@@ -259,9 +286,12 @@ function ScannerPage() {
 
               {result && (
                 <div className={`p-3 rounded ${result.valid ? 'bg-success text-white' : 'bg-danger text-white'}`}>
-                  <h4 className="mb-2">{result.valid ? '✓ VALID TICKET' : '✗ INVALID TICKET'}</h4>
+                  <h4 className="mb-2">
+                    {result.isSimulated ? '✓ PAYMENT RECEIVED' : result.valid ? '✓ VALID TICKET' : '✗ INVALID TICKET'}
+                  </h4>
                   {result.valid ? (
                     <div>
+                      {result.isSimulated && <p className="mb-1"><strong>Demo Payment</strong></p>}
                       <p className="mb-1"><strong>Passenger:</strong> {result.ticket?.passengerName}</p>
                       {result.ticket?.beneficiaryName && <p className="mb-1"><strong>For:</strong> {result.ticket.beneficiaryName}{result.ticket.beneficiaryPhone ? ` (${result.ticket.beneficiaryPhone})` : ''}</p>}
                       <p className="mb-1"><strong>Fare:</strong> RWF {result.ticket?.fare}</p>
@@ -276,6 +306,50 @@ function ScannerPage() {
           </div>
         </div>
       </div>
+      {showPaymentOverlay && paymentData && (
+        <div className="payment-overlay" onClick={() => setShowPaymentOverlay(false)}>
+          <div className="payment-card" onClick={(e) => e.stopPropagation()}>
+            <div className="payment-confetti">
+              <div className="confetti-piece"></div>
+              <div className="confetti-piece"></div>
+              <div className="confetti-piece"></div>
+              <div className="confetti-piece"></div>
+              <div className="confetti-piece"></div>
+              <div className="confetti-piece"></div>
+              <div className="confetti-piece"></div>
+              <div className="confetti-piece"></div>
+            </div>
+
+            <div className="payment-demo-badge">Demo</div>
+
+            <div className="payment-checkmark">
+              <svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+
+            <div className="payment-title">You have paid!</div>
+            <div className="payment-subtitle">Payment received successfully</div>
+
+            <div className="payment-amount">
+              <span className="payment-amount-currency">FRW</span>
+              {paymentData.ticket.fare.toLocaleString()}
+            </div>
+
+            <div className="payment-passenger">
+              from <strong>{paymentData.ticket.passengerName}</strong>
+            </div>
+
+            <div className="payment-time">
+              {new Date(paymentData.ticket.usedAt).toLocaleString()}
+            </div>
+
+            <button className="payment-close-btn" onClick={() => setShowPaymentOverlay(false)}>
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

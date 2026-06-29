@@ -14,6 +14,9 @@ function PassengerDashboard() {
   const [qrCode, setQrCode] = useState(null);
   const [selectedTicketQr, setSelectedTicketQr] = useState(null);
   const [message, setMessage] = useState('');
+  const [showFakePayment, setShowFakePayment] = useState(false);
+  const [fakeAmount, setFakeAmount] = useState('');
+  const [fakeQrValue, setFakeQrValue] = useState('');
 
   const handleCancel = async (ticketId) => {
     try {
@@ -82,6 +85,14 @@ function PassengerDashboard() {
     }
   };
 
+  const handleGenerateFakeQr = () => {
+    const amount = parseFloat(fakeAmount);
+    if (isNaN(amount) || amount <= 0) return;
+    const payload = `SIM_PAY|${user.name || 'Passenger'}|${amount}|${Date.now()}`;
+    setFakeQrValue(payload);
+    setShowFakePayment(true);
+  };
+
   const handleDownloadQr = () => {
     if (!qrCode) return;
     const link = document.createElement('a');
@@ -146,6 +157,21 @@ function PassengerDashboard() {
         </div>
       </div>
 
+      <div className="card border-warning mb-4">
+        <div className="card-body">
+          <h5 className="text-warning">Demo: Simulate Payment QR</h5>
+          <p className="text-muted small">Generate a fake payment QR for testing the scanner (no real charge).</p>
+          <div className="input-group">
+            <input type="number" className="form-control" placeholder="Amount (e.g. 500)"
+              value={fakeAmount} onChange={(e) => setFakeAmount(e.target.value)} />
+            <button className="btn btn-warning" onClick={handleGenerateFakeQr}
+              disabled={!fakeAmount || parseFloat(fakeAmount) <= 0}>
+              Generate Demo QR
+            </button>
+          </div>
+        </div>
+      </div>
+
       {qrCode && (
         <div className="row mb-4">
           <div className="col-md-6 mx-auto">
@@ -159,6 +185,26 @@ function PassengerDashboard() {
                   Save QR Image
                 </button>
                 <p className="mt-2 text-muted">Show this QR to the bus scanner</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFakePayment && (
+        <div className="row mb-4">
+          <div className="col-md-6 mx-auto">
+            <div className="card text-center border-warning">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <h5 className="mb-0 text-warning">Demo Payment QR</h5>
+                  <button className="btn-close" onClick={() => setShowFakePayment(false)}></button>
+                </div>
+                <div className="d-flex justify-content-center bg-white p-3">
+                  <QRCode value={fakeQrValue} size={256} />
+                </div>
+                <p className="mt-2 mb-0 text-muted">Amount: FRW {parseFloat(fakeAmount).toFixed(2)}</p>
+                <p className="text-muted">Show this QR to the scanner for a fake payment demo</p>
               </div>
             </div>
           </div>
