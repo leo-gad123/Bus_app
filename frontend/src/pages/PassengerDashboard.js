@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { QRCode } from 'react-qr-code';
 import { userAPI, routeAPI, ticketAPI } from '../services/api';
 import PassengerLiveLocation from '../components/PassengerLiveLocation';
+import SEO from '../components/SEO';
 
 function PassengerDashboard() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -93,7 +94,9 @@ function PassengerDashboard() {
   };
 
   return (
-    <div>
+    <>
+      <SEO title="Passenger Dashboard" description="Book bus tickets, top up your wallet, and view your ticket history on E-modoka." path="/dashboard" />
+      <div>
       <div className="row mb-4">
         <div className="col">
           <div className="card">
@@ -242,6 +245,7 @@ function PassengerDashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

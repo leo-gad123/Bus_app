@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, getAvatarUrl } from '../services/api';
+import SEO from '../components/SEO';
 
 function Profile() {
   const navigate = useNavigate();
@@ -75,7 +76,9 @@ function Profile() {
     : '?';
 
   return (
-    <div className="row justify-content-center">
+    <>
+      <SEO title="My Profile" description="View and edit your E-modoka account profile, avatar, and password." path="/profile" />
+      <div className="row justify-content-center">
       <div className="col-md-8 col-lg-6 col-xl-5">
         <div className="card">
           <div className="card-body">
@@ -146,6 +149,7 @@ function Profile() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { busAPI, routeAPI, userAPI, ticketAPI, getAvatarUrl } from '../services/api';
+import SEO from '../components/SEO';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -128,7 +129,9 @@ function AdminDashboard() {
   ];
 
   return (
-    <div>
+    <>
+      <SEO title="Admin Dashboard" description="Manage users, routes, buses, and tickets on E-modoka. Admin control panel for bus operations." path="/admin" />
+      <div>
       <h3>Admin Dashboard</h3>
       {message && <div className="alert alert-info">{message}</div>}
 
@@ -398,6 +401,7 @@ function AdminDashboard() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

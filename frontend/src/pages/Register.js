@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import SEO from '../components/SEO';
 
 function Register() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', role: 'passenger' });
@@ -20,7 +21,9 @@ function Register() {
   };
 
   return (
-    <div className="login-page">
+    <>
+      <SEO title="Register" description="Create a new E-modoka account to start booking bus tickets and tracking your trips in Kigali, Rwanda." path="/register" />
+      <div className="login-page">
       <div className="row justify-content-center">
         <div className="col-md-8 col-lg-6 col-xl-5">
           <div className="card">
@@ -78,6 +81,7 @@ function Register() {
       </div>
     </div>
     </div>
+    </>
   );
 }
 

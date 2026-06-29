@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://emodoka.vercel.app/sitemap.xml

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import SEO from '../components/SEO';
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -23,7 +24,9 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
+    <>
+      <SEO title="Login" description="Sign in to your E-modoka account to book bus tickets, track your trips, and manage your wallet." path="/login" />
+      <div className="login-page">
       <div className="row justify-content-center">
         <div className="col-md-8 col-lg-6 col-xl-5">
           <div className="card">
@@ -54,6 +57,7 @@ function Login() {
       </div>
     </div>
     </div>
+    </>
   );
 }
 
